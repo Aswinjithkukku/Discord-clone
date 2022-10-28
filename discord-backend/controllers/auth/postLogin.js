@@ -1,6 +1,7 @@
 const catchAsyncErrors = require('../../middleware/catchAsyncErrors.js')
 const userModel = require("../../models/userModel.js");
 const bcrypt = require("bcryptjs");
+const jwt = require('jsonwebtoken')
 
 const postLogin = catchAsyncErrors( async (req,res,next) => {
     const { mail, password } = req.body
@@ -12,7 +13,16 @@ const postLogin = catchAsyncErrors( async (req,res,next) => {
     const passwordMatch = await bcrypt.compare(password, user.password)
     if(user && passwordMatch) {
         // Send New Token
-        const token = "Jwt_Token"
+        const token = jwt.sign(
+            {
+              userId: user._id,
+              mail
+            },
+            process.env.TOKEN_KEY,
+            {
+              expiresIn: '24h'
+            }
+          )
 
         return res.status(200).json({
             userDetails: {

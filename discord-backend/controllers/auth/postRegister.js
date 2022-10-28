@@ -1,6 +1,7 @@
 const catchAsyncErrors = require("../../middleware/catchAsyncErrors.js");
 const userModel = require("../../models/userModel.js");
 const bcrypt = require("bcryptjs");
+const jwt = require('jsonwebtoken')
 
 const postRegister = catchAsyncErrors(async (req, res, next) => {
   const { mail, username, password } = req.body;
@@ -23,7 +24,16 @@ const postRegister = catchAsyncErrors(async (req, res, next) => {
   });
 
   // Create JWT Token
-  const token = " JwtToken"
+  const token = jwt.sign(
+    {
+      userId: user._id,
+      mail
+    },
+    process.env.TOKEN_KEY,
+    {
+      expiresIn: '24h'
+    }
+  )
 
   res.status(201).json({
     userDetails: {
